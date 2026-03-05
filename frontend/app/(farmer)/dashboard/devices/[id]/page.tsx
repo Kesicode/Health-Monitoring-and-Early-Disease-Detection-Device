@@ -74,7 +74,9 @@ export default function FarmerDeviceDetailPage() {
         </div>
       ) : (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
-          This device is not linked to any animal yet. Go to an animal&apos;s page to claim this device.
+          This device is not linked to any animal yet.{" "}
+          <Link href="/dashboard/devices/claim" className="underline font-medium">Claim &amp; link a device</Link>{" "}
+          to assign it to an animal.
         </div>
       )}
     </div>

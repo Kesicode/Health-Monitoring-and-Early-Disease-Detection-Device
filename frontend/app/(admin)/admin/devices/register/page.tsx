@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,9 +15,18 @@ type FormData = z.infer<typeof schema>;
 
 export default function RegisterDevicePage() {
   const router = useRouter();
+  const [submitError, setSubmitError] = useState("");
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { device_type: "collar" } });
 
-  const onSubmit = async (data: FormData) => { await api.post("/admin/devices", data); router.push("/admin/devices"); };
+  const onSubmit = async (data: FormData) => {
+    setSubmitError("");
+    try {
+      await api.post("/admin/devices", data);
+      router.push("/admin/devices");
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to register device");
+    }
+  };
 
   return (
     <div className="max-w-md space-y-6">
@@ -29,6 +39,7 @@ export default function RegisterDevicePage() {
           <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Serial number</label><input {...register("serial_number")} className="input w-full font-mono" placeholder="AG-XXXX-XXXX" />{errors.serial_number && <p className="text-xs text-red-500 mt-1">{errors.serial_number.message}</p>}</div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Type</label><select {...register("device_type")} className="input w-full">{DEVICE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}</select></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Firmware version <span className="text-gray-400">(optional)</span></label><input {...register("firmware_version")} className="input w-full" placeholder="1.0.0" /></div>
+          {submitError && <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{submitError}</p>}
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={isSubmitting} className="btn-primary flex items-center gap-2">{isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}Register</button>
             <Link href="/admin/devices" className="btn-secondary">Cancel</Link>

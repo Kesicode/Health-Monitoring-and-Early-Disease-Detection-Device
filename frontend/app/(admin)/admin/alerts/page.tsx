@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { AlertCard } from "@/components/alerts/AlertCard";
 
-interface Alert { id: number; animal_id: number; animal_name?: string; alert_type: string; severity: string; message: string; metric_value: number | null; is_resolved: boolean; created_at: string; resolved_at?: string | null; }
+interface Alert { id: number; animal_id: number; animal: { id: number; name: string; animal_type: string } | null; alert_type: string; severity: string; message: string; metric_value: number | null; is_resolved: boolean; created_at: string; resolved_at?: string | null; }
 
 export default function AdminAlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -29,13 +29,13 @@ export default function AdminAlertsPage() {
             key={a.id}
             id={a.id}
             animal_id={a.animal_id}
-            animal_name={a.animal_name}
             alert_type={a.alert_type}
             severity={a.severity}
             message={a.message}
             is_resolved={a.is_resolved}
             created_at={a.created_at}
             resolved_at={a.resolved_at}
+            animal_name={a.animal?.name}
             basePath="/admin"
             onResolve={() => resolve(a.id)}
           />

@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,11 +19,17 @@ type FormData = z.infer<typeof schema>;
 
 export default function CreateUserPage() {
   const router = useRouter();
+  const [submitError, setSubmitError] = useState("");
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { role: "farmer" } });
 
   const onSubmit = async (data: FormData) => {
-    await api.post("/admin/users", data);
-    router.push("/admin/users");
+    setSubmitError("");
+    try {
+      await api.post("/admin/users", data);
+      router.push("/admin/users");
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to create user");
+    }
   };
 
   return (
@@ -47,6 +54,7 @@ export default function CreateUserPage() {
               <option value="admin">Admin</option>
             </select>
           </div>
+          {submitError && <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{submitError}</p>}
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={isSubmitting} className="btn-primary flex items-center gap-2">
               {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}Create user

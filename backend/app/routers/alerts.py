@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
 from app.core.dependencies import require_farmer
@@ -23,7 +23,7 @@ def list_my_alerts(
     db: Session = Depends(get_db),
 ):
     my_animal_ids = [a.id for a in db.query(Animal).filter(Animal.owner_id == current_user.id).all()]
-    q = db.query(Alert).filter(Alert.animal_id.in_(my_animal_ids))
+    q = db.query(Alert).options(joinedload(Alert.animal)).filter(Alert.animal_id.in_(my_animal_ids))
     if animal_id is not None:
         q = q.filter(Alert.animal_id == animal_id)
     if unresolved_only:

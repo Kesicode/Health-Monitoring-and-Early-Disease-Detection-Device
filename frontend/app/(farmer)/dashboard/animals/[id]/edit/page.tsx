@@ -31,6 +31,7 @@ export default function EditAnimalPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [loaded, setLoaded] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
@@ -51,8 +52,13 @@ export default function EditAnimalPage() {
   }, [id, reset]);
 
   const onSubmit = async (data: FormData) => {
-    await api.patch(`/animals/${id}`, data);
-    router.push(`/dashboard/animals/${id}`);
+    setSubmitError("");
+    try {
+      await api.patch(`/animals/${id}`, data);
+      router.push(`/dashboard/animals/${id}`);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to save changes");
+    }
   };
 
   if (!loaded) return <div className="animate-pulse h-96 bg-gray-100 rounded-2xl" />;
@@ -120,6 +126,8 @@ export default function EditAnimalPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes</label>
             <textarea {...register("notes")} className="input w-full h-20 resize-none" />
           </div>
+
+          {submitError && <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{submitError}</p>}
 
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={isSubmitting} className="btn-primary flex items-center gap-2">
