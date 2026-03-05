@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,11 +23,17 @@ type FormData = z.infer<typeof schema>;
 
 export default function RegisterAnimalPage() {
   const router = useRouter();
+  const [submitError, setSubmitError] = useState("");
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormData) => {
-    const res = await api.post<{ id: number }>("/animals", data);
-    router.push(`/dashboard/animals/${res.id}`);
+    setSubmitError("");
+    try {
+      const res = await api.post<{ id: number }>("/animals", data);
+      router.push(`/dashboard/animals/${res.id}`);
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "Failed to register animal");
+    }
   };
 
   return (
@@ -63,6 +70,7 @@ export default function RegisterAnimalPage() {
           </div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Tag number</label><input {...register("tag_number")} className="input w-full" placeholder="e.g. TAG-001" /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Notes</label><textarea {...register("notes")} className="input w-full h-20 resize-none" placeholder="Any additional notes..." /></div>
+          {submitError && <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{submitError}</p>}
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={isSubmitting} className="btn-primary flex items-center gap-2">{isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}Register animal</button>
             <Link href="/dashboard/animals" className="btn-secondary">Cancel</Link>

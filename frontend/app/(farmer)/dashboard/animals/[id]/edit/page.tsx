@@ -47,7 +47,7 @@ export default function EditAnimalPage() {
         notes: a.notes ?? "",
       });
       setLoaded(true);
-    });
+    }).catch(() => setLoaded(true));
   }, [id, reset]);
 
   const onSubmit = async (data: FormData) => {

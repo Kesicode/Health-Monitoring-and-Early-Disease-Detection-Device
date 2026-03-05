@@ -10,7 +10,7 @@ export default function AdminAlertsPage() {
   const [unresolvedOnly, setUnresolvedOnly] = useState(false);
 
   const load = () => api.get<Alert[]>(`/admin/alerts?limit=200&unresolved_only=${unresolvedOnly}`).then(setAlerts).catch(() => {});
-  useEffect(() => { load(); }, [unresolvedOnly]);
+  useEffect(() => { load(); }, [unresolvedOnly]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resolve = async (id: number) => { await api.patch(`/admin/alerts/${id}/resolve`, {}); load(); };
 
@@ -24,7 +24,22 @@ export default function AdminAlertsPage() {
         </label>
       </div>
       <div className="space-y-3">
-        {alerts.map(a => <AlertCard key={a.id} basePath="/admin" {...a} onResolve={() => resolve(a.id)} />)}
+        {alerts.map(a => (
+          <AlertCard
+            key={a.id}
+            id={a.id}
+            animal_id={a.animal_id}
+            animal_name={a.animal_name}
+            alert_type={a.alert_type}
+            severity={a.severity}
+            message={a.message}
+            is_resolved={a.is_resolved}
+            created_at={a.created_at}
+            resolved_at={a.resolved_at}
+            basePath="/admin"
+            onResolve={() => resolve(a.id)}
+          />
+        ))}
         {alerts.length === 0 && <div className="text-center py-16 text-sm text-gray-400">No alerts found</div>}
       </div>
     </div>

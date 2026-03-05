@@ -30,7 +30,7 @@ export function AnimalCard({ id, name, animal_type, breed, tag_number, image_url
         ) : (
           <div className="flex h-full items-center justify-center text-5xl">
             {["cow","chicken","goat","pig","dog"].includes(animal_type)
-              ? { cow:"🐄", chicken:"🐔", goat:"🐐", pig:"🐷", dog:"🐕" }[animal_type]
+              ? ({ cow:"🐄", chicken:"🐔", goat:"🐐", pig:"🐷", dog:"🐕" } as Record<string, string>)[animal_type]
               : "🐾"}
           </div>
         )}

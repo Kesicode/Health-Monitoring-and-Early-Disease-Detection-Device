@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 
 export function AlertBannerWrapper() {
   const user = getCurrentUser();
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissedId, setDismissedId] = useState<number | null>(null);
   const { recentAlerts } = useAlertsWS({
     userId: user?.sub ? String(user.sub) : "",
     enabled: !!user?.sub,
@@ -16,8 +16,8 @@ export function AlertBannerWrapper() {
 
   return (
     <AlertBanner
-      alert={dismissed ? null : latestAlert}
-      onDismiss={() => setDismissed(true)}
+      alert={latestAlert?.id === dismissedId ? null : latestAlert}
+      onDismiss={() => setDismissedId(latestAlert?.id ?? null)}
     />
   );
 }

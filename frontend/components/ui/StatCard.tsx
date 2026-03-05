@@ -5,7 +5,6 @@ interface StatCardProps {
   value: string | number;
   subtitle?: string;
   icon?: React.ReactNode;
-  trend?: { value: number; label: string };
   color?: "green" | "yellow" | "red" | "blue" | "default";
   className?: string;
 }

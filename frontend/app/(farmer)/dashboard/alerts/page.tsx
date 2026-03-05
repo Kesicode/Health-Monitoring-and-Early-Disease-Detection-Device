@@ -17,7 +17,7 @@ export default function FarmerAlertsPage() {
 
   const fetchAlerts = async () => {
     setLoading(true);
-    const params = filter === "unresolved" ? "?is_resolved=false" : "";
+    const params = filter === "unresolved" ? "?unresolved_only=true" : "";
     api.get<Alert[]>(`/alerts${params}`).then(setAlerts).finally(() => setLoading(false));
   };
 
@@ -61,7 +61,19 @@ export default function FarmerAlertsPage() {
               {a.animal && (
                 <p className="text-xs font-medium text-gray-500 px-1">{a.animal.name} · <span className="capitalize">{a.animal.animal_type}</span></p>
               )}
-              <AlertCard key={a.id} {...a} animal_name={a.animal?.name ?? ""} onResolve={a.is_resolved ? undefined : () => handleResolve(a.id)} />
+            <AlertCard
+              key={a.id}
+              id={a.id}
+              animal_id={a.animal_id}
+              alert_type={a.alert_type}
+              severity={a.severity}
+              message={a.message}
+              is_resolved={a.is_resolved}
+              created_at={a.created_at}
+              resolved_at={a.resolved_at}
+              animal_name={a.animal?.name ?? ""}
+              onResolve={a.is_resolved ? undefined : () => handleResolve(a.id)}
+            />
             </div>
           ))}
         </div>

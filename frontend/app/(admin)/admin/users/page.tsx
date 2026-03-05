@@ -15,7 +15,7 @@ export default function AdminUsersPage() {
   const [deleting, setDeleting] = useState<number | null>(null);
 
   const load = () => api.get<User[]>("/admin/users?limit=200").then(setUsers).catch(() => {});
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()));
 
@@ -46,7 +46,7 @@ export default function AdminUsersPage() {
                 <td className="px-4 py-3 font-medium text-gray-900">{u.name}</td>
                 <td className="px-4 py-3 text-gray-500">{u.email}</td>
                 <td className="px-4 py-3"><span className={`text-xs font-medium px-2 py-0.5 rounded-full ${u.role === "admin" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>{u.role}</span></td>
-                <td className="px-4 py-3"><StatusBadge status={u.is_active ? "active" : "offline"} /></td>
+                <td className="px-4 py-3"><StatusBadge status={u.is_active ? "active" : "banned"} /></td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2 justify-end">
                     <Link href={`/admin/users/${u.id}`} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500"><Pencil className="w-3.5 h-3.5" /></Link>

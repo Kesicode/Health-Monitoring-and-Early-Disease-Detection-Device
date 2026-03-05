@@ -1,6 +1,6 @@
 "use client";
 import { MetricTile } from "@/components/ui/MetricTile";
-import { formatTemp, formatHR, formatScore } from "@/lib/utils";
+
 import type { HealthReading } from "@/lib/useHealthWS";
 
 interface HealthMetricsPanelProps {

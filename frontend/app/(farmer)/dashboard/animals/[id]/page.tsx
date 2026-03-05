@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Pencil, QrCode, Cpu } from "lucide-react";
@@ -23,6 +23,7 @@ function AnimalHealthPanel({ animal }: { animal: Animal }) {
   const [prevReading, setPrevReading] = useState<HealthReading | null>(null);
   const [latestFromAPI, setLatestFromAPI] = useState<HealthReading | null>(null);
   const { latestReading, isConnected } = useHealthWS({ animalId: animal.id });
+  const prevWSRef = useRef<HealthReading | null>(null);
 
   useEffect(() => {
     api.get<HealthReading[]>(`/health/${animal.id}/readings?limit=2`).then((readings) => {
@@ -32,8 +33,11 @@ function AnimalHealthPanel({ animal }: { animal: Animal }) {
   }, [animal.id]);
 
   useEffect(() => {
-    if (latestReading) setPrevReading(latestFromAPI);
-  }, [latestReading]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (latestReading) {
+      setPrevReading(prevWSRef.current ?? latestFromAPI);
+      prevWSRef.current = latestReading;
+    }
+  }, [latestReading, latestFromAPI]);
 
   const currentReading = latestReading ?? latestFromAPI;
 

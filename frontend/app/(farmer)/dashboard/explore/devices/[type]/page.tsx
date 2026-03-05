@@ -57,8 +57,9 @@ const DEVICE_INFO: Record<string, {
   },
 };
 
-export default function DeviceTypePage({ params }: { params: { type: string } }) {
-  const info = DEVICE_INFO[params.type];
+export default async function DeviceTypePage({ params }: { params: Promise<{ type: string }> }) {
+  const { type } = await params;
+  const info = DEVICE_INFO[type];
   if (!info) notFound();
 
   const Icon = info.icon;

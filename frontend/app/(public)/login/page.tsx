@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Heart, Eye, EyeOff, Loader2 } from "lucide-react";
-import { saveTokens } from "@/lib/auth";
+import { saveTokens, decodeToken } from "@/lib/auth";
 import { API_BASE } from "@/lib/constants";
 
 const schema = z.object({
@@ -16,8 +16,10 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const registered = searchParams.get("registered");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema) });
@@ -37,7 +39,8 @@ export default function LoginPage() {
       }
       const { access_token, refresh_token } = await res.json();
       saveTokens(access_token, refresh_token);
-      const payload = JSON.parse(atob(access_token.split(".")[1]));
+      const payload = decodeToken(access_token);
+      if (!payload) { setError("Invalid token received"); return; }
       router.push(payload.role === "admin" ? "/admin/dashboard" : "/dashboard");
     } catch {
       setError("Network error. Please try again.");
@@ -61,6 +64,7 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome back</h1>
           <p className="text-sm text-gray-500 mb-8">Sign in to your Agri Guard account</p>
 
+          {registered && <div className="mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">Account created! Please sign in below.</div>}
           {error && <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</div>}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -91,5 +95,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
