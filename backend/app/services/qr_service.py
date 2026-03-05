@@ -4,7 +4,6 @@ import io
 import json
 
 import qrcode
-from qrcode.image.pure import PyPNGImage
 
 
 def generate_animal_qr(animal_id: int, animal_name: str) -> str:
@@ -13,7 +12,7 @@ def generate_animal_qr(animal_id: int, animal_name: str) -> str:
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=8, border=2)
     qr.add_data(data)
     qr.make(fit=True)
-    img = qr.make_image(image_factory=PyPNGImage)
+    img = qr.make_image()  # uses PIL factory (qrcode[pil] / Pillow already in requirements)
     buffer = io.BytesIO()
-    img.save(buffer)
+    img.save(buffer, format="PNG")
     return base64.b64encode(buffer.getvalue()).decode()

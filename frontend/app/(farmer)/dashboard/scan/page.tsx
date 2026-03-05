@@ -1,8 +1,9 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { QrCode, Camera, AlertCircle } from "lucide-react";
 import { api } from "@/lib/api";
+import jsQR from "jsqr";
 
 export default function ScanPage() {
   const router = useRouter();
@@ -11,7 +12,9 @@ export default function ScanPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const animFrameRef = useRef<number | null>(null);
 
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +33,16 @@ export default function ScanPage() {
     }
   };
 
+  const stopCamera = useCallback(() => {
+    if (animFrameRef.current !== null) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setMode("manual");
+  }, []);
+
   const startCamera = async () => {
     setMode("camera");
     setError("");
@@ -46,13 +59,50 @@ export default function ScanPage() {
     }
   };
 
-  const stopCamera = () => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-    setMode("manual");
-  };
+  // QR decode loop — runs whenever camera mode is active
+  useEffect(() => {
+    if (mode !== "camera") return;
 
-  useEffect(() => () => { streamRef.current?.getTracks().forEach((t) => t.stop()); }, []);
+    const tick = () => {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      if (!video || !canvas || video.readyState !== video.HAVE_ENOUGH_DATA) {
+        animFrameRef.current = requestAnimationFrame(tick);
+        return;
+      }
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      if (code) {
+        try {
+          const parsed = JSON.parse(code.data) as { id?: number; type?: string };
+          if (parsed.type === "agri_guard_animal" && parsed.id) {
+            stopCamera();
+            router.push(`/dashboard/animals/${parsed.id}`);
+            return;
+          }
+        } catch {
+          // not a valid animal QR — keep scanning
+        }
+      }
+      animFrameRef.current = requestAnimationFrame(tick);
+    };
+
+    animFrameRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [mode, router, stopCamera]);
+
+  // cleanup on unmount
+  useEffect(() => () => {
+    if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current);
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+  }, []);
 
   return (
     <div className="max-w-md mx-auto space-y-6">
@@ -68,6 +118,7 @@ export default function ScanPage() {
         <div className="space-y-4">
           <div className="relative bg-black rounded-2xl overflow-hidden aspect-square">
             <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
+            <canvas ref={canvasRef} className="hidden" />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-48 h-48 border-2 border-white/80 rounded-xl" style={{ boxShadow: "0 0 0 9999px rgba(0,0,0,0.5)" }} />
             </div>
