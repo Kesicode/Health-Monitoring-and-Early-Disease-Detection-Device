@@ -33,7 +33,6 @@ class AnimalOut(BaseModel):
     gender: str | None
     tag_number: str | None
     notes: str | None
-    qr_code: str | None
     owner_id: int
     created_at: datetime
 

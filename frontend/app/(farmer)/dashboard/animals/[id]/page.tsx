@@ -2,11 +2,10 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Pencil, QrCode, Cpu } from "lucide-react";
+import { ArrowLeft, Pencil, Cpu } from "lucide-react";
 import { api } from "@/lib/api";
 import { AnimalTypeBadge } from "@/components/animals/AnimalTypeBadge";
 import { HealthMetricsPanel } from "@/components/animals/HealthMetricsPanel";
-import { QRCodeDisplay } from "@/components/animals/QRCodeDisplay";
 import { AlertCard } from "@/components/alerts/AlertCard";
 import { useHealthWS, type HealthReading } from "@/lib/useHealthWS";
 
@@ -14,7 +13,7 @@ interface Device { serial_number: string; is_active: boolean; device_type: strin
 interface Animal {
   id: number; name: string; animal_type: string; breed: string | null;
   age_months: number | null; weight_kg: number | null; gender: string | null;
-  tag_number: string | null; notes: string | null; qr_code: string | null;
+  tag_number: string | null; notes: string | null;
   device: Device | null;
 }
 interface Alert { id: number; animal_id: number; alert_type: string; severity: string; message: string; metric_value: number | null; is_resolved: boolean; created_at: string; resolved_at?: string | null; }
@@ -48,7 +47,6 @@ export default function FarmerAnimalDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [showQR, setShowQR] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -83,11 +81,6 @@ export default function FarmerAnimalDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          {animal.qr_code && (
-            <button onClick={() => setShowQR(true)} className="btn-secondary flex items-center gap-2 text-sm">
-              <QrCode className="w-4 h-4" />QR Code
-            </button>
-          )}
           <Link href={`/dashboard/animals/${id}/edit`} className="btn-primary flex items-center gap-2 text-sm">
             <Pencil className="w-3.5 h-3.5" />Edit
           </Link>
@@ -148,8 +141,6 @@ export default function FarmerAnimalDetailPage() {
         </div>
       )}
 
-      {/* QR modal */}
-      {showQR && animal.qr_code && <QRCodeDisplay base64={animal.qr_code} name={animal.name} onClose={() => setShowQR(false)} />}
     </div>
   );
 }

@@ -30,6 +30,7 @@ class DeviceOut(BaseModel):
     is_claimed: bool
     owner_id: int | None
     animal_id: int | None
+    qr_code: str | None
     last_seen: datetime | None
     registered_at: datetime
 

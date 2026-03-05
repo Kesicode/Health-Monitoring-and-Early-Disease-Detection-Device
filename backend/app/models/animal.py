@@ -17,7 +17,6 @@ class Animal(Base):
     gender: Mapped[str | None] = mapped_column(String(10), nullable=True)
     tag_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    qr_code: Mapped[str | None] = mapped_column(Text, nullable=True)  # base64 PNG
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 

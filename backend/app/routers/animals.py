@@ -6,7 +6,6 @@ from app.core.dependencies import get_current_user, require_farmer
 from app.models.animal import Animal
 from app.models.user import User
 from app.schemas.animal import AnimalCreate, AnimalUpdate, AnimalOut, AnimalWithDevice
-from app.services.qr_service import generate_animal_qr
 
 router = APIRouter(prefix="/animals", tags=["animals"])
 
@@ -29,8 +28,6 @@ def create_animal(
 ):
     animal = Animal(**body.model_dump(), owner_id=current_user.id)
     db.add(animal)
-    db.flush()
-    animal.qr_code = generate_animal_qr(animal.id, animal.name)
     db.commit()
     db.refresh(animal)
     return animal

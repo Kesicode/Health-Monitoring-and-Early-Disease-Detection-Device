@@ -6,6 +6,7 @@ from app.core.dependencies import require_admin
 from app.models.device import Device
 from app.models.user import User
 from app.schemas.device import DeviceRegister, DeviceUpdate, DeviceOut
+from app.services.qr_service import generate_device_qr
 
 router = APIRouter(prefix="/admin/devices", tags=["admin-devices"])
 
@@ -30,6 +31,8 @@ def register_device(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Serial number already exists")
     device = Device(**body.model_dump())
     db.add(device)
+    db.flush()
+    device.qr_code = generate_device_qr(device.serial_number)
     db.commit()
     db.refresh(device)
     return device

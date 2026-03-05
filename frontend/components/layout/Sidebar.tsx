@@ -19,7 +19,6 @@ const farmerNav: NavItem[] = [
   { label: "Dashboard",  href: "/dashboard",           icon: <LayoutDashboard className="h-5 w-5" /> },
   { label: "Animals",    href: "/dashboard/animals",   icon: <Dog className="h-5 w-5" /> },
   { label: "Devices",    href: "/dashboard/devices",   icon: <Cpu className="h-5 w-5" /> },
-  { label: "Scan QR",    href: "/dashboard/scan",      icon: <Activity className="h-5 w-5" /> },
   { label: "Explore",    href: "/dashboard/explore",   icon: <BarChart2 className="h-5 w-5" /> },
   { label: "Alerts",     href: "/dashboard/alerts",    icon: <Bell className="h-5 w-5" /> },
 ];

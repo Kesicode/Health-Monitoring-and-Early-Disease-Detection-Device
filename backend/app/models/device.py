@@ -16,6 +16,7 @@ class Device(Base):
     is_claimed: Mapped[bool] = mapped_column(Boolean, default=False)
     owner_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     animal_id: Mapped[int | None] = mapped_column(ForeignKey("animals.id"), nullable=True, unique=True)
+    qr_code: Mapped[str | None] = mapped_column(nullable=True)
     last_seen: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     registered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 

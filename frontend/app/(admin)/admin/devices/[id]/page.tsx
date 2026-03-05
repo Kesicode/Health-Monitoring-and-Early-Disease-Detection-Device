@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Cpu, Trash2, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, Cpu, Trash2, ExternalLink, Loader2, QrCode, Download, Printer } from "lucide-react";
 import { api } from "@/lib/api";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -11,6 +11,7 @@ interface Device {
   id: number; serial_number: string; device_type: string;
   firmware_version: string | null; is_active: boolean; is_claimed: boolean;
   owner_id: number | null; animal_id: number | null;
+  qr_code: string | null;
   last_seen: string | null; registered_at: string;
 }
 
@@ -110,6 +111,41 @@ export default function AdminDeviceDetailPage() {
           </div>
         ))}
       </div>
+
+      {/* QR Code */}
+      {device.qr_code && (
+        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <p className="text-sm font-medium text-gray-700 mb-4 flex items-center gap-2">
+            <QrCode className="w-4 h-4" /> Device QR code
+          </p>
+          <div className="flex flex-col items-center gap-4">
+            <img
+              src={`data:image/png;base64,${device.qr_code}`}
+              alt={`QR for ${device.serial_number}`}
+              className="w-48 h-48 rounded-lg border border-gray-100"
+            />
+            <p className="text-xs text-gray-500 font-mono">{device.serial_number}</p>
+            <div className="flex gap-3">
+              <a
+                href={`data:image/png;base64,${device.qr_code}`}
+                download={`device-qr-${device.serial_number}.png`}
+                className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" /> Download
+              </a>
+              <button
+                onClick={() => {
+                  const win = window.open("");
+                  win?.document.write(`<img src="data:image/png;base64,${device.qr_code}" onload="window.print();window.close()" />`);
+                }}
+                className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors"
+              >
+                <Printer className="w-3.5 h-3.5" /> Print
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Claim & link */}
       <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-6">
